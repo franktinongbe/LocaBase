@@ -1,51 +1,35 @@
-const express = require('express');
-const { connectToDatabase } = require('./config/db');
 require('dotenv').config();
 
+const express = require('express');
+const mongoose = require('mongoose');
+
 const app = express();
+
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Middleware
-app.use(express.json());
-
-// Connexion à MongoDB
-mongoose.connect('mongodb+srv://franktinongbe86:CWPWULPZ2ZicULtE@cluster0.vp8mrza.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log('MongoDB Connected');
-}).catch((err) => {
-  console.log('MongoDB connection error:', err);
-});
-
-
-// Routes
-app.get('/', (req, res) => {
-    res.json({ message: 'API fonctionne !' });
-});
-
-// Exemple d'utilisation de MongoDB
-app.get('/users', async (req, res) => {
-    try {
-        const { getDb } = require('./config/db');
-        const db = getDb();
-        const users = await db.collection('users').find({}).toArray();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Démarrage du serveur APRÈS connexion à MongoDB
-async function startServer() {
-    try {
-        await connectToDatabase();
-        app.listen(PORT, () => {
-            console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-        });
-    } catch (error) {
-        console.error('Erreur au démarrage:', error);
-    }
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI manquante dans .env');
+  process.exit(1);
 }
 
-startServer();
+// Connexion MongoDB
+const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log("✅ MongoDB connecté !");
+  } catch (error) {
+    console.error("❌ Erreur de connexion MongoDB:", error.message);
+    process.exit(1);
+  }
+};
+
+connectDB();
+
+app.get('/', (req, res) => {
+  res.json({ message: "API BaseLife fonctionne." });
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur lancé sur le port ${PORT}`);
+});
