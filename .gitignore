@@ -3,3 +3,46 @@ echo .env >> .gitignore
 echo node_modules/
 .env
 node_modules/
+
+# Dépendances
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables d'environnement (IMPORTANT!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Fichiers de log
+logs/
+*.log
+
+# Fichiers temporaires
+.tmp/
+temp/
+
+# Fichiers de build
+dist/
+build/
+
+# Fichiers d'upload
+uploads/
+public/uploads/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers de cache
+.cache/
+.npm/

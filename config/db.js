@@ -1,19 +1,11 @@
-const { MongoClient } = require('mongodb');
+require('dotenv').config();
+const mongoose = require('mongoose');
 
-const uri = "mongodb+srv://franktinongbe86:CWPWULPZ2ZfioULt@cluster0.vp8mrza.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
-let db;
-
-async function connectToDatabase() {
-    const client = new MongoClient(uri);
-    await client.connect();
-    db = client.db('LocaBase'); // Remplacez par le nom de votre DB
-    console.log("Connecté à MongoDB Atlas!");
-    return db;
-}
-
-function getDb() {
-    return db;
-}
-
-module.exports = { connectToDatabase, getDb };
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("✅ Connexion MongoDB réussie !");
+    mongoose.connection.close();
+  })
+  .catch(err => {
+    console.error("❌ Échec connexion MongoDB :", err.message);
+  });
