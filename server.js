@@ -1,35 +1,42 @@
-require('dotenv').config();
+require('dotenv').config(); // Charge les variables d’environnement depuis .env
 
 const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
+app.use(express.json()); // Pour gérer le JSON dans les requêtes
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// Vérifie que l’URL MongoDB est bien fournie
 if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI manquante dans .env');
+  console.error('❌ MONGODB_URI manquante dans le fichier .env');
   process.exit(1);
 }
 
-// Connexion MongoDB
+// Connexion à MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log("✅ MongoDB connecté !");
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log("✅ Connexion à MongoDB réussie !");
   } catch (error) {
-    console.error("❌ Erreur de connexion MongoDB:", error.message);
+    console.error("❌ Erreur de connexion MongoDB :", error.message);
     process.exit(1);
   }
 };
 
 connectDB();
 
+// Route de test
 app.get('/', (req, res) => {
-  res.json({ message: "API BaseLife fonctionne." });
+  res.json({ message: "🚀 API BaseLife fonctionne." });
 });
 
+// Démarrer le serveur
 app.listen(PORT, () => {
-  console.log(`🚀 Serveur lancé sur le port ${PORT}`);
+  console.log(`🚀 Serveur en écoute sur le port ${PORT}`);
 });
