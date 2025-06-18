@@ -1,13 +1,14 @@
-// routes/paymentRoutes.js
 const express = require('express');
 const axios = require('axios');
 const User = require('../models/User');
 const generateInvoice = require('../utils/generateInvoice');  // Importer la fonction pour générer la facture
 const nodemailer = require('nodemailer');  // Pour envoyer la facture par email
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 
-const CINETPAY_API_KEY = 'VOTRE_API_KEY';
-const CINETPAY_SITE_ID = 'VOTRE_SITE_ID';
+const CINETPAY_API_KEY = process.env.CINETPAY_API_KEY; // API_KEY depuis l'environnement
+const CINETPAY_SITE_ID = process.env.CINETPAY_SITE_ID; // SITE_ID depuis l'environnement
 
 // Route de callback pour gérer le paiement
 router.post('/callback', async (req, res) => {
@@ -59,7 +60,7 @@ router.post('/callback', async (req, res) => {
       await user.save();
 
       // Génération de la facture PDF
-      generateInvoice(user); // Génère la facture PDF dans le dossier ./invoices/
+      await generateInvoice(user); // Génère la facture PDF dans le dossier ./invoices/
 
       // Envoi de la facture par email
       sendInvoice(user);
@@ -79,17 +80,22 @@ async function sendInvoice(user) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'your-email@gmail.com',  // Remplacer par ton adresse email
-      pass: 'your-email-password'    // Remplacer par ton mot de passe
+      user: process.env.EMAIL_USER,  // Utilisation de la variable d'environnement pour l'email
+      pass: process.env.EMAIL_PASS   // Utilisation de la variable d'environnement pour le mot de passe
     }
   });
 
   const invoicePath = `facture_${user._id}.pdf`;
-  const invoiceDir = `./invoices/${invoicePath}`;
+  const invoiceDir = path.join(__dirname, '../invoices', invoicePath);
+
+  // Vérifie si le répertoire existe sinon crée-le
+  if (!fs.existsSync(path.dirname(invoiceDir))) {
+    fs.mkdirSync(path.dirname(invoiceDir), { recursive: true });
+  }
 
   // Envoi de l'email avec la facture en pièce jointe
   const mailOptions = {
-    from: 'your-email@gmail.com',  // Ton email
+    from: process.env.EMAIL_USER,  // Ton email
     to: user.email,               // Email de l'utilisateur
     subject: 'Votre facture d\'abonnement',
     text: 'Veuillez trouver votre facture en pièce jointe.',
@@ -110,7 +116,6 @@ async function sendInvoice(user) {
 }
 
 module.exports = router;
-
 
 /**
  * @swagger

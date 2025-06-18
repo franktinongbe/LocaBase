@@ -2,6 +2,9 @@ require('dotenv').config(); // Charge les variables d’environnement depuis .en
 
 const express = require('express');
 const mongoose = require('mongoose');
+const paymentRoutes = require('./routes/paymentRoutes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./Swagger'); // chemin selon ton arborescence
 
 const app = express();
 app.use(express.json()); // Pour gérer le JSON dans les requêtes
@@ -33,23 +36,15 @@ app.get('/', (req, res) => {
   res.json({ message: "🚀 API BaseLife fonctionne." });
 });
 
+// Routes
+app.use('/payment', paymentRoutes);
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+require('./cronJob'); // Lance le cron job
+
 // Démarrer le serveur
 app.listen(PORT, () => {
   console.log(`🚀 Serveur en écoute sur le port ${PORT}`);
 });
-
-const paymentRoutes = require('./routes/paymentRoutes');
-app.use('/payment', paymentRoutes);
-
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./Swagger'); // chemin selon ton arborescence
-
-// server.js
-const express = require('express');
-require('./cronJob'); // Lance le cron job
-
-// Autres middlewares et routes...
-
-
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
