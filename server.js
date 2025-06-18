@@ -37,3 +37,10 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Serveur en écoute sur le port ${PORT}`);
 });
+
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./Swagger'); // chemin selon ton arborescence
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
