@@ -1,11 +1,22 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+const abonnementSchema = new mongoose.Schema({
+  actif: { type: Boolean, default: false },
+  type: {
+    type: String,
+    enum: ['trimestriel', 'semestriel', 'annuel', 'gratuit'],
+    default: 'gratuit'
+  },
+  dateDebut: { type: Date },
+  dateFin: { type: Date }
+});
+
 const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['user', 'pro', 'admin'],
-    default: 'user' // rôle par défaut
+    default: undefined
   },
   name: {
     type: String,
@@ -19,27 +30,30 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
+  },
+  abonnement: {
+    type: abonnementSchema,
+    default: () => ({ type: 'gratuit', actif: false })
   }
 }, { timestamps: true });
 
-userSchema.pre('save', async function(next) {
-  // Si le rôle n'est pas défini, le définir en fonction d'une logique
+// Middleware : traitement avant sauvegarde
+userSchema.pre('save', async function (next) {
+  // Définition dynamique du rôle
   if (!this.role) {
-    // Ici tu pourrais mettre une logique pour définir si 'pro' ou 'user'
-    // Par exemple, si un utilisateur est inscrit via un formulaire spécial, tu pourrais lui donner le rôle 'pro'
-    // Exemple simple : si l'email contient 'pro', alors attribuer le rôle 'pro', sinon 'user'
-    if (this.email.includes('pro')) {
-      this.role = 'pro';
-    } else {
-      this.role = 'user';
-    }
+    this.role = this.email.toLowerCase().includes('pro') ? 'pro' : 'user';
   }
 
-  // Cryptage du mot de passe si nécessaire
+  // Si le rôle est user ou pro, il doit avoir un abonnement valide
+  if ((this.role === 'user' || this.role === 'pro') && !this.abonnement.type) {
+    throw new Error('Un abonnement est requis pour les utilisateurs user ou pro.');
+  }
+
+  // Cryptage du mot de passe
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);
   }
-  
+
   next();
 });
 

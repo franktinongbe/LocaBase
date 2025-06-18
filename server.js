@@ -38,9 +38,18 @@ app.listen(PORT, () => {
   console.log(`🚀 Serveur en écoute sur le port ${PORT}`);
 });
 
+const paymentRoutes = require('./routes/paymentRoutes');
+app.use('/payment', paymentRoutes);
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./Swagger'); // chemin selon ton arborescence
+
+// server.js
+const express = require('express');
+require('./cronJob'); // Lance le cron job
+
+// Autres middlewares et routes...
+
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
