@@ -110,3 +110,36 @@ async function sendInvoice(user) {
 }
 
 module.exports = router;
+
+
+/**
+ * @swagger
+ * /callback:
+ *   post:
+ *     summary: Gestion de la réponse de paiement CinetPay
+ *     description: Cette route est appelée par CinetPay pour notifier de l'état du paiement. Elle met à jour l'abonnement de l'utilisateur, génère une facture et envoie un email avec la facture.
+ *     tags:
+ *       - Paiements
+ *     requestBody:
+ *       description: Détails de la transaction de paiement
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               transaction_id:
+ *                 type: string
+ *                 description: ID de la transaction CinetPay
+ *     responses:
+ *       200:
+ *         description: Abonnement activé et facture envoyée
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaymentResponse'
+ *       400:
+ *         description: Paiement rejeté ou en attente
+ *       500:
+ *         description: Erreur du serveur
+ */

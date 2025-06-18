@@ -24,3 +24,33 @@ function generateInvoice(user) {
 }
 
 module.exports = generateInvoice;
+
+
+/**
+ * @swagger
+ * /generate-invoice:
+ *   get:
+ *     summary: Générer la facture d'un utilisateur
+ *     description: Cette route génère une facture PDF pour un utilisateur basé sur son abonnement.
+ *     tags:
+ *       - Factures
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur
+ *     responses:
+ *       200:
+ *         description: Facture générée avec succès
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur lors de la génération de la facture
+ */
