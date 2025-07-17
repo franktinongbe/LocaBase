@@ -51,5 +51,3 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
-
-module.exports = { register, login };
