@@ -1,34 +1,36 @@
-// server.js
+// server.js ou app.js
 require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors = require('cors'); // 👉 Import du middleware cors
 
-// ✅ Importation des routes
 const authRoutes = require('./routes/auth');
 const businessRoutes = require('./routes/business');
+// ... autres routes
 
 const app = express();
 
-// ✅ Configuration CORS
+// 👉 Utilisation de CORS avant les routes
 app.use(cors({
-  origin: process.env.CLIENT_URL, // ✅ récupéré depuis .env
+  origin: [
+    'http://localhost:3000',
+    'https://locabase.onrender.com'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
 
-// ✅ Middleware pour parser le JSON
+
 app.use(express.json());
 
-// ✅ Déclaration des routes
+// 👉 Définir les routes après les middlewares
 app.use('/api/auth', authRoutes);
 app.use('/api/business', businessRoutes);
-// ... autres routes à ajouter si besoin
+// ... autres routes
 
-// ✅ Connexion à MongoDB
-console.log("📦 MONGO_URI =", process.env.MONGO_URI); // DEBUG
+// Connexion à la base de données
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -36,10 +38,8 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("✅ Connexion MongoDB réussie"))
 .catch((err) => console.error("❌ Erreur MongoDB :", err));
 
-// ✅ Démarrage du serveur
+// Démarrer le serveur
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });
-// Exportation de l'application pour les tests ou autres usages
-module.exports = app;

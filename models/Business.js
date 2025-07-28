@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const business = new mongoose.Schema({
+const businessSchema = new mongoose.Schema({
   companyName: { type: String, required: true },
   location: { type: String, required: true },
   type: {
@@ -8,17 +8,24 @@ const business = new mongoose.Schema({
     enum: ['hôtel', 'restaurant', 'service', 'boutique', 'autre'],
     required: true
   },
-  description: { type: String },
-  phone: { type: String },
-  email: { type: String },
-  website: { type: String },
-  galleryImageUrls: [String],
-
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true // chaque business doit être lié à un pro
+  description: { type: String, required: true },
+  galleryImageUrls: {
+    type: [String],
+    default: []
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  phone: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Business', business);
+module.exports = mongoose.model('Business', businessSchema);

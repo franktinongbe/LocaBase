@@ -13,38 +13,58 @@ const abonnementSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    lowercase: true,
+    trim: true,
+    validate: {
+      validator: (email) =>
+        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email),
+      message: 'Email invalide'
+    }
+  },
+
+  profileImageUrl: { type: String, default: null },
+
+  memberSince: {
+    type: String,
+    default: () => new Date().toISOString().split('T')[0]
+  },
+
+  bio: { type: String, default: '' },
+
+  phoneNumber: { type: String, default: null },
+
+  pays: { type: String, default: null },
+
+  typeCount: { type: String, required: true },
+
+  businessProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business',
+    default: null
+  },
+
+  password: { type: String, required: true },
+
   role: {
     type: String,
     enum: ['user', 'pro', 'admin'],
     default: undefined
   },
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-    validate: {
-      validator: (email) => {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return emailRegex.test(email);
-      },
-      message: 'Email invalide'
-    }
-  },
-  password: {
-    type: String,
-    required: true
-  },
+
   abonnement: {
     type: abonnementSchema,
     default: () => ({ type: 'gratuit', actif: false })
   }
+
 }, { timestamps: true });
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.role) {
     this.role = this.email.toLowerCase().includes('pro') ? 'pro' : 'user';
   }

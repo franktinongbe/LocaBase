@@ -1,53 +1,58 @@
-// controllers/authController.js
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-exports.register = async (req, res) => {
+const register = async (req, res) => {
+  const { name, email, password, role = 'user', bio, phoneNumber, pays, profileImageUrl, typeCount } = req.body;
+
   try {
-    const { name, email, password, role } = req.body;
-
-    // Validation des champs
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: "Tous les champs sont requis" });
-    }
-
-    const userExist = await User.findOne({ email });
-    if (userExist) return res.status(400).json({ message: "L'utilisateur existe déjà" });
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ message: "Email déjà utilisé" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword, role });
 
-    await newUser.save();
-    res.status(201).json({ message: "Utilisateur enregistré avec succès" });
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      bio: bio || '',
+      phoneNumber: phoneNumber || '',
+      pays: pays || '',
+      profileImageUrl: profileImageUrl || '',
+      typeCount: typeCount || '',
+      memberSince: new Date().toISOString(),
+    });
+
+    res.status(201).json({ message: "Inscription réussie", userId: newUser._id });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
-    // Validation des champs
-    if (!email || !password) {
-      return res.status(400).json({ message: "L'email et le mot de passe sont requis" });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+    const user = await User.findOne({ email }).populate('businessProfile');
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: '3d',
+    });
 
-    res.status(200).json({ message: "Connexion réussie", token });
+    res.json({
+      token,
+      role: user.role,
+      name: user.name,
+      businessProfile: user.businessProfile || null
+    });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 };
+
+module.exports = { register, login };
